@@ -318,3 +318,17 @@ Data size: 1.3 KB
 `Tools 3` был заблокирован, AI отсутствовал в логе. Бот доставил правильный `error_message`. После теста профиль кандидата восстановлен без нового запуска.
 
 Отдельная Telegram-доставка `FAIL` настроена, но пока не подтверждена самостоятельным E2E-тестом.
+
+### Telegram `/start` welcome без AI
+
+Текущая command route принимает непустой текст, отделяет `vacancy_text Starts with "/"` и отправляет статическое приветствие. Реальный `/start` дал:
+
+```text
+Trigger: Manual
+Duration: less than a second
+Operations: 3
+Credits: 3
+Data size: 1.7 KB
+```
+
+Выполнились Telegram trigger, input Tools и Telegram send. Missing-input и AI routes были заблокированы, AI отсутствовал в execution log. Бот получил полное приветствие с инструкцией прислать текст вакансии и описанием `FAIL` / `MANUAL_REVIEW`.

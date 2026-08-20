@@ -315,8 +315,7 @@ Data size: 3.8 KB
 2. Добавить безопасный входной trigger.
 3. Подключить получение текста вакансии и данных кандидата.
 4. Добавить отдельную смысловую проверку достаточности после технической проверки.
-5. Добавить приветственную Telegram-ветку для команд без AI.
-6. Провести отдельный Telegram E2E-тест доставки `FAIL`.
+5. Провести отдельный Telegram E2E-тест доставки `FAIL`.
 
 ## Telegram delivery layer
 
@@ -324,11 +323,14 @@ Data size: 3.8 KB
 
 - `Telegram Bot — Watch Updates` как instant trigger;
 - mapping `Message.Text → vacancy_text`;
-- фильтр команд `Message.Text Does not start with "/"`;
+- входной фильтр `Message.Text Not equal to emptystring`;
+- отдельный command / vacancy Router: команды `/...` идут в welcome, обычный текст — в защищённую AI-ветку;
 - Telegram send modules после `Missing input`, `FAIL` и `MANUAL_REVIEW`;
 - динамический `Chat ID` из `Message.Chat.ID`.
 
-Реальный `/start` был заблокирован до AI. Реальный текст вакансии прошёл до fallback `MANUAL_REVIEW` и был доставлен в исходный Telegram chat. Метрики:
+Первый `/start`-тест был заблокирован до AI. После добавления welcome-ветки повторный `/start` выполнил trigger, input Tools и Telegram delivery за менее чем секунду: `3 operations`, `3 credits`, `1.7 KB`; AI отсутствовал в логе.
+
+Реальный текст вакансии прошёл до fallback `MANUAL_REVIEW` и был доставлен в исходный Telegram chat. Метрики:
 
 ```text
 11 seconds

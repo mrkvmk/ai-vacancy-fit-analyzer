@@ -164,7 +164,9 @@
 - fallback `Manual review required` и `Tools 13` не выполняются;
 - после теста временный паттерн удаляется, остаются только production-проверки.
 
-## Тест-кейс 13 — Telegram-команда не запускает AI
+## Тест-кейс 13 — первоначальная блокировка Telegram-команды до welcome route
+
+Этот тест зафиксировал первый безопасный baseline до добавления текущей приветственной ветки.
 
 ### Вход
 
@@ -270,6 +272,46 @@ Execution log:
 ```text
 Не хватает данных вакансии или кандидата. Полный AI-анализ не запущен. Пришлите недостающий текст, файл или читаемые скриншоты.
 ```
+
+### Вердикт
+
+```text
+PASS
+```
+
+## Тест-кейс 16 — Telegram `/start` welcome без AI
+
+### Вход
+
+```text
+/start
+```
+
+### Ожидание
+
+- непустой Telegram text проходит входной фильтр;
+- command route `vacancy_text Starts with "/"` выполняется;
+- missing-input и AI routes блокируются;
+- бот отправляет статическое приветствие;
+- AI не запускается.
+
+### Фактический результат
+
+```text
+Duration: less than a second
+Operations: 3
+Credits: 3
+Data size: 1.7 KB
+```
+
+Execution log:
+
+- `Telegram Bot — Watch Updates` completed;
+- `Tools — Set multiple variables` completed;
+- missing-input Tools did not pass the filter;
+- success `Tools 3` did not pass the filter;
+- Telegram welcome delivery completed;
+- AI отсутствовал в логе.
 
 ### Вердикт
 

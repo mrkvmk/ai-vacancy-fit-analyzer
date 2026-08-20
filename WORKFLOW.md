@@ -1,4 +1,4 @@
-# AI Vacancy Fit Analyzer — Workflow v0.5
+# AI Vacancy Fit Analyzer — Workflow v0.6
 
 ## Статус
 
@@ -241,19 +241,24 @@ Fallback   Проверка достаточности
 ```text
 Telegram Bot: Watch Updates
   ↓
-Filter: Message.Text Does not start with "/"
+Filter: Message.Text Not equal to emptystring
   ↓
 Set multiple variables
   vacancy_text ← Telegram Message.Text
   candidate_data ← сохранённый профиль
   ↓
-Input Router → AI → fail-closed QA Router
+Input Router
   ├─ Missing input → Telegram error
-  ├─ Known violation → Telegram FAIL
-  └─ fallback → Telegram MANUAL_REVIEW + AI Answer
+  └─ Command / vacancy Router
+       ├─ vacancy_text Starts with "/" → Telegram welcome
+       └─ both inputs present
+          AND vacancy_text Does not start with "/"
+            → AI → fail-closed QA Router
+               ├─ Known violation → Telegram FAIL
+               └─ fallback → Telegram MANUAL_REVIEW + AI Answer
 ```
 
-Команда `/start` была реально остановлена перед `Tools` и AI. Полный E2E run обычного текста прошёл через `MANUAL_REVIEW` и доставил ответ в Telegram:
+Полный E2E run обычного текста прошёл через `MANUAL_REVIEW` и доставил ответ в Telegram:
 
 ```text
 11 seconds
@@ -262,4 +267,8 @@ Input Router → AI → fail-closed QA Router
 8.7 KB
 ```
 
-Telegram-доставка `Missing input` также подтверждена: менее секунды, `4 operations`, `4 credits`, `1.3 KB`; AI не запускался. Отдельный Telegram E2E-тест доставки `FAIL` ещё не выполнен. Подробности: [`TELEGRAM_MVP.md`](TELEGRAM_MVP.md).
+Telegram-доставка `Missing input` подтверждена: менее секунды, `4 operations`, `4 credits`, `1.3 KB`; AI не запускался.
+
+Приветственная `/start`-ветка также подтверждена: менее секунды, `3 operations`, `3 credits`, `1.7 KB`; выполнились trigger, input Tools и Telegram welcome, AI отсутствовал в логе.
+
+Отдельный Telegram E2E-тест доставки `FAIL` ещё не выполнен. Подробности: [`TELEGRAM_MVP.md`](TELEGRAM_MVP.md).

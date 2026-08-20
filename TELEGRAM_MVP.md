@@ -11,8 +11,8 @@ Telegram-версия сценария собрана как отдельная 
 ```text
 Telegram Bot — Watch Updates
   ↓
-Filter: Ignore Telegram commands
-  Message.Text Does not start with "/"
+Filter: Text messages only
+  Message.Text Not equal to emptystring
   ↓
 Tools — Set multiple variables
   vacancy_text = Telegram Message.Text
@@ -22,36 +22,53 @@ Input Router
   ├─ Missing input
   │    → error_message
   │    → Telegram: сообщение об ошибке
-  └─ Both inputs present
-       → validation_status
-       → Make AI Toolkit
-       → QA Router
-          ├─ Known QA violation
-          │    → qa_status = FAIL
-          │    → Telegram: только сообщение о блокировке
-          └─ fallback: Manual review required
-               → qa_status = MANUAL_REVIEW
-               → Telegram: предупреждение + qa_message + AI Answer
+  └─ Command / vacancy Router
+       ├─ vacancy_text Starts with "/"
+       │    → Telegram: приветствие без AI
+       └─ оба input заполнены
+          AND vacancy_text Does not start with "/"
+            → validation_status
+            → Make AI Toolkit
+            → QA Router
+               ├─ Known QA violation
+               │    → qa_status = FAIL
+               │    → Telegram: только сообщение о блокировке
+               └─ fallback: Manual review required
+                    → qa_status = MANUAL_REVIEW
+                    → Telegram: предупреждение + qa_message + AI Answer
 ```
 
 Автоматического `PASS` в Telegram-потоке нет.
 
-## Защита от команд
+## Защита от команд и приветствие
 
-Команды Telegram не должны анализироваться как вакансии. Перед входными переменными установлен фильтр:
+Первый защитный тест блокировал `/start` перед `Tools` и AI: trigger получил один update, filter пропустил `0` bundles, downstream не запускался. После этого схема была расширена пользовательской welcome-веткой.
+
+Текущая защита состоит из двух фильтров:
 
 ```text
-Message.Text Does not start with "/"
+вход:
+Message.Text Not equal to emptystring
+
+AI route:
+оба input заполнены
+AND vacancy_text Does not start with "/"
+
+command route:
+vacancy_text Starts with "/"
 ```
 
-Реальный тест `/start` подтвердил:
+Реальный `/start` прошёл только через trigger, входные переменные и Telegram welcome delivery. AI отсутствовал в execution log.
 
-- Telegram trigger получил один update;
-- фильтр пропустил `0` bundles;
-- `Tools`, AI и модули доставки не запускались;
-- AI credits на анализ команды не тратились.
+```text
+Trigger: Manual
+Duration: less than a second
+Operations: 3
+Credits: 3
+Data size: 1.7 KB
+```
 
-В текущей версии команды блокируются без приветственного ответа.
+Бот доставил приветствие с инструкцией прислать текст вакансии и пояснением статусов `FAIL` и `MANUAL_REVIEW`.
 
 ## Реальный end-to-end тест
 
@@ -156,7 +173,8 @@ Data size: 1.3 KB
 
 - получение обычного текстового сообщения Telegram;
 - mapping `Message.Text → vacancy_text`;
-- блокировка `/start` до AI;
+- первоначальная блокировка `/start` до AI;
+- текущая `/start` welcome-ветка без AI;
 - success-вход через `Both inputs present`;
 - AI-вызов;
 - fallback `MANUAL_REVIEW`;
@@ -171,7 +189,7 @@ Data size: 1.3 KB
 
 - профиль кандидата пока статически хранится в Make;
 - бот принимает текст вакансии, но не читает ссылки, PDF или изображения;
-- `/start` и другие команды блокируются без приветственного сообщения;
+- команды получают одно общее приветствие; отдельные ответы для `/help` и неизвестных команд пока не реализованы;
 - Telegram-сценарий не активирован для постоянной работы;
 - слишком длинный AI-ответ потенциально может превысить лимит одного Telegram-сообщения;
 - детерминированный QA gate ищет известные строки, но не заменяет смысловую проверку;
