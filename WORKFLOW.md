@@ -1,4 +1,4 @@
-# AI Vacancy Fit Analyzer — Workflow v0.6
+# AI Vacancy Fit Analyzer — Workflow v0.7
 
 ## Статус
 
@@ -271,4 +271,6 @@ Telegram-доставка `Missing input` подтверждена: менее �
 
 Приветственная `/start`-ветка также подтверждена: менее секунды, `3 operations`, `3 credits`, `1.7 KB`; выполнились trigger, input Tools и Telegram welcome, AI отсутствовал в логе.
 
-Отдельный Telegram E2E-тест доставки `FAIL` ещё не выполнен. Подробности: [`TELEGRAM_MVP.md`](TELEGRAM_MVP.md).
+Telegram `FAIL` на текущей Router-архитектуре подтверждён: `17 seconds`, `6 operations`, `6.85 credits`, `5.7 KB`; выполнились AI, FAIL Tools и Telegram block delivery, а `MANUAL_REVIEW` был заблокирован. Временный guaranteed pattern после теста удалён без повторного запуска.
+
+Таким образом, отдельно подтверждены welcome, missing-input, `MANUAL_REVIEW` и `FAIL` Telegram paths. Подробности: [`TELEGRAM_MVP.md`](TELEGRAM_MVP.md).

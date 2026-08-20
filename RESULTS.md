@@ -317,7 +317,19 @@ Data size: 1.3 KB
 
 `Tools 3` был заблокирован, AI отсутствовал в логе. Бот доставил правильный `error_message`. После теста профиль кандидата восстановлен без нового запуска.
 
-Отдельная Telegram-доставка `FAIL` настроена, но пока не подтверждена самостоятельным E2E-тестом.
+### Telegram FAIL delivery на текущей Router-архитектуре
+
+Контролируемый run с временным guaranteed pattern `Статус данных` прошёл через input Tools, success marker, AI, FAIL Tools и Telegram block delivery:
+
+```text
+Trigger: Manual
+Duration: 17 seconds
+Operations: 6
+Credits: 6.85
+Data size: 5.7 KB
+```
+
+Missing-input и command routes были заблокированы; `MANUAL_REVIEW` не выполнялся. Пользователь получил только безопасное `❌ FAIL` сообщение, AI Answer не отправлялся. После теста временный паттерн удалён, production filter и scenario сохранены без повторного запуска.
 
 ### Telegram `/start` welcome без AI
 

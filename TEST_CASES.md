@@ -318,3 +318,50 @@ Execution log:
 ```text
 PASS
 ```
+
+## Тест-кейс 17 — Telegram FAIL на текущей Router-архитектуре
+
+### Подготовка
+
+Во временный конец `Known QA violation` добавлено отдельное OR-условие:
+
+```text
+4.Answer
+Contains (case insensitive)
+Статус данных
+```
+
+### Ожидание
+
+- обычный текст проходит current vacancy route и запускает AI;
+- guaranteed pattern направляет Answer только в `FAIL`;
+- `MANUAL_REVIEW` не выполняется;
+- Telegram отправляет только блокирующее сообщение, не AI Answer;
+- временное условие после теста удаляется без повторного запуска.
+
+### Фактический результат
+
+```text
+Duration: 17 seconds
+Operations: 6
+Credits: 6.85
+Data size: 5.7 KB
+```
+
+Выполнились trigger, input Tools, success Tools, AI, FAIL Tools и Telegram FAIL delivery. Missing-input, command и `MANUAL_REVIEW` routes были заблокированы.
+
+Полученный текст:
+
+```text
+❌ FAIL
+
+Ответ заблокирован: обнаружена запрещённая или служебная формулировка. Нужна ручная проверка.
+```
+
+Временный `Статус данных` удалён; постоянные patterns сохранены. Сценарий сохранён без нового AI-run.
+
+### Вердикт
+
+```text
+PASS
+```

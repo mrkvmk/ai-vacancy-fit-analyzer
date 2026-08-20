@@ -167,6 +167,42 @@ Data size: 1.3 KB
 
 `Both inputs present` был заблокирован, `Tools 3` не прошёл фильтр, а AI отсутствовал в execution log. Бот доставил ожидаемое сообщение о недостающих данных. После фиксации доказательств полный `candidate_data` был восстановлен и сценарий сохранён без повторного запуска.
 
+## Telegram FAIL test на текущей архитектуре
+
+Для контролируемого теста во временный конец `Known QA violation` был добавлен отдельный OR-паттерн `Статус данных`. Обычный Telegram-текст вакансии прошёл текущий путь:
+
+```text
+Telegram trigger
+→ input Tools
+→ input Router
+→ command / vacancy Router
+→ success marker
+→ AI
+→ Known QA violation
+→ qa_status = FAIL
+→ Telegram block delivery
+```
+
+History evidence:
+
+```text
+Trigger: Manual
+Duration: 17 seconds
+Operations: 6
+Credits: 6.85
+Data size: 5.7 KB
+```
+
+Missing-input и command routes были заблокированы. `MANUAL_REVIEW` и его Telegram delivery не выполнялись. Пользователь получил только:
+
+```text
+❌ FAIL
+
+Ответ заблокирован: обнаружена запрещённая или служебная формулировка. Нужна ручная проверка.
+```
+
+AI Answer пользователю не отправлялся. После фиксации operation bubbles, сообщения и History metrics временный `Статус данных` был удалён. В production filter остались только постоянные паттерны; сценарий сохранён без повторного запуска.
+
 ## Что проверено, а что ещё нет
 
 Проверено фактически:
@@ -179,11 +215,19 @@ Data size: 1.3 KB
 - AI-вызов;
 - fallback `MANUAL_REVIEW`;
 - отправка предупреждения, QA-сообщения и полного AI-ответа в исходный Telegram chat;
-- missing-input маршрут без AI и доставка `error_message` в Telegram.
+- missing-input маршрут без AI и доставка `error_message` в Telegram;
+- текущая vacancy route через AI, `FAIL` Tools и Telegram block delivery без показа AI Answer.
 
-Настроено, но пока не прошло отдельный Telegram E2E-тест:
+Все четыре пользовательских Telegram path подтверждены отдельными реальными тестами: welcome, missing input, `MANUAL_REVIEW` и `FAIL`.
 
-- отправка сообщения из `FAIL`.
+## Сводная test matrix
+
+| Path | Duration | Operations | Credits | Data size | AI |
+|---|---:|---:|---:|---:|---|
+| `/start` welcome | < 1 s | 3 | 3 | 1.7 KB | No |
+| Missing input | < 1 s | 4 | 4 | 1.3 KB | No |
+| MANUAL_REVIEW | 11 s | 6 | 6.94 | 8.7 KB | Yes |
+| FAIL | 17 s | 6 | 6.85 | 5.7 KB | Yes, answer blocked |
 
 ## Ограничения
 
