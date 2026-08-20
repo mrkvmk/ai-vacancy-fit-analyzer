@@ -227,6 +227,75 @@ Output: Answer — Long String
 
 Технический успех MVP не означает production-качество текста. Перед использованием для реальных карьерных решений промпт и модель требуют дополнительного QA.
 
+## Сравнение моделей
+
+| Модель | Reasoning | Время | Operations | Credits | Ручной QA |
+|---|---|---:|---:|---:|---|
+| Small (`gpt-5-nano`) | minimal | 5 секунд | 3 | 3.31 | FAIL |
+| Medium (`gpt-5-nano`) | low | 12 секунд | 3 | 3.97 | FAIL, но основные вердикты лучше |
+
+Medium стоила на `0.66 credits` больше Small и работала в `2.4 раза` дольше. Улучшение вердиктов не устранило выдуманные навыки, неправильные типы доказательств и завышенную самооценку QA.
+
+## Детерминированный QA gate
+
+После AI добавлен второй Router без дополнительного AI-вызова:
+
+```text
+AI Answer
+→ QA Router
+   ├─ Known QA violation
+   │     Answer contains один из известных паттернов
+   │         ↓
+   │     qa_status = FAIL
+   │     qa_message = ответ заблокирован
+   │
+   └─ fallback: Manual review required
+         ↓
+      qa_status = MANUAL_REVIEW
+      qa_message = semantic PASS не подтверждён
+```
+
+Production-паттерны:
+
+```text
+junior
+стажиров
+ментор
+примеры проектов внедрения
++ причина + следующий шаг
+можно принимать /
+```
+
+Одна фраза хранится в одном OR-условии. Gate использует mapped `Answer` из Make AI Toolkit и оператор `Contains (case insensitive)`.
+
+### MANUAL_REVIEW test
+
+```text
+Duration: 11 seconds
+Operations: 4
+Credits: 4.85
+Data size: 4.3 KB
+```
+
+`Known QA violation` был заблокирован, fallback выполнился, `Tools 13` вернул `qa_status = MANUAL_REVIEW`.
+
+### FAIL test
+
+Для контролируемого теста временно добавлялся паттерн `Статус данных`, гарантированно присутствующий в формате ответа.
+
+```text
+Duration: 13 seconds
+Operations: 4
+Credits: 4.83
+Data size: 3.8 KB
+```
+
+`Known QA violation` выполнился, `Tools 12` вернул `qa_status = FAIL`, fallback не запускался. После теста временный паттерн удалён.
+
+### Граница защиты
+
+Детерминированный filter умеет обнаруживать только перечисленные паттерны. Отсутствие совпадения не доказывает смысловую корректность, поэтому автоматический `PASS` запрещён. Все остальные ответы получают `MANUAL_REVIEW`.
+
 ## Не реализовано
 
 - Telegram trigger и webhook;

@@ -1,4 +1,4 @@
-# AI Vacancy Fit Analyzer — Workflow v0.3
+# AI Vacancy Fit Analyzer — Workflow v0.4
 
 ## Статус
 
@@ -23,6 +23,10 @@ Router
       validation_status
           ↓
       Make AI Toolkit: Simple Text Prompt
+          ↓
+      QA Router
+         ├─ известный запрещённый паттерн → qa_status = FAIL
+         └─ fallback → qa_status = MANUAL_REVIEW
 ```
 
 Фактические результаты:
@@ -30,7 +34,10 @@ Router
 - пустой `candidate_data` → fallback выполнен, AI заблокирован, `2 operations`, `2 credits`;
 - оба input заполнены → AI выполнен, fallback заблокирован, `3 operations`, `3.31 credits`;
 - scenario оставался `Inactive`, расписание было выключено;
-- использован встроенный Make AI Provider без внешнего API-ключа.
+- использован встроенный Make AI Provider без внешнего API-ключа;
+- добавлен детерминированный QA Router без второго AI-вызова;
+- автоматический `PASS` не присваивается: известное нарушение даёт `FAIL`, отсутствие совпадений — только `MANUAL_REVIEW`;
+- обе QA-ветки фактически протестированы и оказались взаимоисключающими.
 
 ## Цель
 
