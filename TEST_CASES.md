@@ -114,3 +114,29 @@
 - отправить fallback-файл пользователю;
 - сообщить, что Google Docs временно не обновлён;
 - при необходимости позже повторить только сохранение в Google Docs.
+
+## Test case 9 — Make MVP: отсутствуют данные кандидата
+
+**Сценарий:** `vacancy_text` заполнен, а mapped variable `candidate_data` имеет значение `emptystring`.
+
+**Ожидается:**
+
+- route `Missing input` получает один bundle;
+- `Tools 6` создаёт понятный `error_message`;
+- route `Both inputs present` блокирует bundle;
+- `Tools 3` и `Make AI Toolkit` не выполняются;
+- AI-token credits не списываются;
+- сценарий остаётся `Inactive`.
+
+## Test case 10 — Make MVP: оба input заполнены
+
+**Сценарий:** mapped variables `vacancy_text` и `candidate_data` заполнены синтетическими тестовыми данными.
+
+**Ожидается:**
+
+- route `Missing input` блокирует bundle;
+- route `Both inputs present` получает один bundle;
+- `Tools 3` создаёт `validation_status`;
+- `Make AI Toolkit` запускается ровно один раз;
+- Output содержит текстовый `Answer`;
+- технический успех оценивается отдельно от смыслового QA ответа.

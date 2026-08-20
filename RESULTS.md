@@ -136,3 +136,62 @@
 **Статус:** `PASS` для трёх документированных аварийных сценариев.
 
 Проверенные fallback-ветки конкретны, ограничивают retry и не выдают отсутствующие данные или нереализованную автоматизацию за готовый результат.
+
+## Фактические тесты Make no-code MVP
+
+Тесты проведены 20 августа 2026 года в ручном неактивном сценарии Make. Это интеграционные тесты Router, filters, Tools variables и Make AI Toolkit. Они не подтверждают Telegram trigger, автоматическое извлечение вакансии или доставку результата.
+
+### Test case 9 — отсутствуют данные кандидата
+
+**Результат:** `PASS`.
+
+```text
+Trigger: Manual
+Duration: Less than a second
+Operations: 2
+Credits: 2
+Data size: 733 B
+```
+
+Журнал выполнения:
+
+- `Tools 2 — Set multiple variables` — completed;
+- `Tools 6 — Set variable` — completed;
+- `Tools 3 — Set variable` — bundle did not pass through the filter;
+- `Make AI Toolkit` отсутствует в журнале.
+
+Fallback создал `error_message`; AI не запускался и AI-token credits не списывались.
+
+### Test case 10 — оба input заполнены
+
+**Результат маршрутизации:** `PASS`.
+
+```text
+Trigger: Manual
+Duration: 5 seconds
+Operations: 3
+Credits: 3.31
+Data size: 5.4 KB
+```
+
+Журнал выполнения:
+
+- `Tools 2 — Set multiple variables` — completed;
+- `Tools 6 — Set variable` — bundle did not pass through the filter;
+- `Tools 3 — Set variable` — completed;
+- `Make AI Toolkit — Simple Text Prompt` — completed.
+
+AI-модуль выполнил одну operation стоимостью `1.31 credits`, передал `4.4 KB` и вернул `Answer: Long String`.
+
+### Семантический QA Make AI-ответа
+
+**Статус:** `CONDITIONAL PASS`.
+
+Ответ правильно обработал достаточность данных, Краснодар, гибрид, Excel, зарплату, отсутствие холодных звонков и переносимый опыт. Остались исправимые дефекты:
+
+- запрос проектов внедрения, которых нет в подтверждённых данных;
+- противоречие в оценке подходящего гибрида в Краснодаре;
+- преждевременная рекомендация `можно принимать` до появления реального предложения;
+- неестественные служебные формулировки.
+
+Технический MVP работает, но текстовый анализ требует дальнейшего prompt QA. Подробности: [`MAKE_MVP.md`](MAKE_MVP.md).

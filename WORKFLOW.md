@@ -1,8 +1,36 @@
-# AI Vacancy Fit Analyzer — Workflow v0.2
+# AI Vacancy Fit Analyzer — Workflow v0.3
 
 ## Статус
 
-Это спроектированный и протестированный workflow для будущей автоматизации. Telegram-бот, webhook endpoint и автоматическое сохранение в Google Docs пока не реализованы.
+Workflow спроектирован и частично реализован как ручной no-code MVP в Make. Router, технические фильтры, AI-ветка и fallback для пустого input фактически протестированы. Telegram-бот, webhook endpoint, автоматическое извлечение данных, доставка результата и сохранение в Google Docs пока не реализованы.
+
+Подробности реализации и execution evidence: [`MAKE_MVP.md`](MAKE_MVP.md).
+
+## Реализованный Make MVP
+
+```text
+Tools: Set multiple variables
+        ↓
+Router
+   ├─ vacancy_text = emptystring
+   │  OR candidate_data = emptystring
+   │      ↓
+   │  error_message
+   │
+   └─ vacancy_text ≠ emptystring
+      AND candidate_data ≠ emptystring
+          ↓
+      validation_status
+          ↓
+      Make AI Toolkit: Simple Text Prompt
+```
+
+Фактические результаты:
+
+- пустой `candidate_data` → fallback выполнен, AI заблокирован, `2 operations`, `2 credits`;
+- оба input заполнены → AI выполнен, fallback заблокирован, `3 operations`, `3.31 credits`;
+- scenario оставался `Inactive`, расписание было выключено;
+- использован встроенный Make AI Provider без внешнего API-ключа.
 
 ## Цель
 
@@ -193,8 +221,7 @@ Fallback   Проверка достаточности
 
 ## Открытые технические вопросы
 
-- какой no-code-инструмент использовать;
-- как реализовать Telegram trigger и webhook endpoint;
+- как заменить ручной запуск Make безопасным Telegram trigger и webhook endpoint;
 - как извлекать текст с сайтов, ограничивающих автоматический доступ;
 - как обрабатывать PDF и сканы через OCR;
 - где хранить профиль кандидата и результаты;
