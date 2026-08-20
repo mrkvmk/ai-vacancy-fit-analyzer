@@ -1,8 +1,8 @@
-# AI Vacancy Fit Analyzer — Workflow v0.4
+# AI Vacancy Fit Analyzer — Workflow v0.5
 
 ## Статус
 
-Workflow спроектирован и частично реализован как ручной no-code MVP в Make. Router, технические фильтры, AI-ветка и fallback для пустого input фактически протестированы. Telegram-бот, webhook endpoint, автоматическое извлечение данных, доставка результата и сохранение в Google Docs пока не реализованы.
+Workflow реализован как ручной no-code MVP и отдельный Telegram MVP в Make. Router, технические фильтры, AI-ветка, fail-closed QA gate, Telegram trigger и доставка `MANUAL_REVIEW` фактически протестированы. Автоматическое извлечение данных и сохранение в Google Docs пока не реализованы.
 
 Подробности реализации и execution evidence: [`MAKE_MVP.md`](MAKE_MVP.md).
 
@@ -45,7 +45,7 @@ Router
 
 ## Trigger
 
-Telegram-бот получил сообщение со ссылкой или данными вакансии.
+В текущем MVP Telegram-бот получает обычное текстовое сообщение с вакансией. Приём ссылок запланирован, но ещё не реализован.
 
 Trigger запускает workflow, но не является входными данными.
 
@@ -235,3 +235,31 @@ Fallback   Проверка достаточности
 - как безопасно хранить API-ключи и OAuth-токены;
 - как реализовать временное хранилище готового анализа перед сохранением;
 - как логировать retry, fallback и ошибки без утечки персональных данных.
+
+## Telegram MVP — фактическая архитектура
+
+```text
+Telegram Bot: Watch Updates
+  ↓
+Filter: Message.Text Does not start with "/"
+  ↓
+Set multiple variables
+  vacancy_text ← Telegram Message.Text
+  candidate_data ← сохранённый профиль
+  ↓
+Input Router → AI → fail-closed QA Router
+  ├─ Missing input → Telegram error
+  ├─ Known violation → Telegram FAIL
+  └─ fallback → Telegram MANUAL_REVIEW + AI Answer
+```
+
+Команда `/start` была реально остановлена перед `Tools` и AI. Полный E2E run обычного текста прошёл через `MANUAL_REVIEW` и доставил ответ в Telegram:
+
+```text
+11 seconds
+6 operations
+6.94 credits
+8.7 KB
+```
+
+Отдельные Telegram E2E-тесты доставок `Missing input` и `FAIL` ещё не выполнены. Подробности: [`TELEGRAM_MVP.md`](TELEGRAM_MVP.md).

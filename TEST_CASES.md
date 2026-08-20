@@ -163,3 +163,72 @@
 - `Tools 12` создаёт `qa_status = FAIL` и блокирующее сообщение;
 - fallback `Manual review required` и `Tools 13` не выполняются;
 - после теста временный паттерн удаляется, остаются только production-проверки.
+
+## Тест-кейс 13 — Telegram-команда не запускает AI
+
+### Вход
+
+```text
+/start
+```
+
+### Ожидание
+
+- Telegram trigger получает update;
+- filter `Message.Text Does not start with "/"` возвращает `0`;
+- входные `Tools`, AI и доставка не запускаются.
+
+### Фактический результат
+
+- trigger получил `1` update;
+- command filter пропустил `0` bundles;
+- все downstream-модули остались заблокированы;
+- AI analysis credits не списывались.
+
+### Вердикт
+
+```text
+PASS
+```
+
+## Тест-кейс 14 — Telegram end-to-end MANUAL_REVIEW
+
+### Вход
+
+Обычным сообщением боту отправлен полный текст тестовой вакансии. `candidate_data` взят из сохранённого профиля в Make.
+
+### Ожидание
+
+- текст Telegram mapped в `vacancy_text`;
+- `Both inputs present` запускает AI;
+- отсутствие известного паттерна направляет результат в `MANUAL_REVIEW`;
+- бот отправляет предупреждение, `qa_message` и полный AI-ответ.
+
+### Фактический результат
+
+```text
+Duration: 11 seconds
+Operations: 6
+Credits: 6.94
+Data size: 8.7 KB
+```
+
+Фактический маршрут:
+
+```text
+Telegram trigger
+→ Tools 2
+→ Tools 3
+→ AI
+→ Tools 13
+→ Telegram delivery
+```
+
+`Missing input` и `Known QA violation` были заблокированы. Полный `MANUAL_REVIEW`-ответ получен в Telegram без видимого обрезания.
+
+### Вердикт
+
+```text
+Технический E2E: PASS
+Смысловой результат: MANUAL_REVIEW
+```

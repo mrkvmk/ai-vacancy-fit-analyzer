@@ -315,5 +315,26 @@ Data size: 3.8 KB
 2. Добавить безопасный входной trigger.
 3. Подключить получение текста вакансии и данных кандидата.
 4. Добавить отдельную смысловую проверку достаточности после технической проверки.
-5. Добавить доставку результата.
-6. Провести end-to-end тесты успешной и аварийной веток.
+5. Добавить приветственную Telegram-ветку для команд без AI.
+6. Провести отдельные Telegram E2E-тесты доставок `Missing input` и `FAIL`.
+
+## Telegram delivery layer
+
+Ручной Make MVP был клонирован в отдельный Telegram-сценарий. Добавлены:
+
+- `Telegram Bot — Watch Updates` как instant trigger;
+- mapping `Message.Text → vacancy_text`;
+- фильтр команд `Message.Text Does not start with "/"`;
+- Telegram send modules после `Missing input`, `FAIL` и `MANUAL_REVIEW`;
+- динамический `Chat ID` из `Message.Chat.ID`.
+
+Реальный `/start` был заблокирован до AI. Реальный текст вакансии прошёл до fallback `MANUAL_REVIEW` и был доставлен в исходный Telegram chat. Метрики:
+
+```text
+11 seconds
+6 operations
+6.94 credits
+8.7 KB
+```
+
+Полный поток и ограничения описаны в [`TELEGRAM_MVP.md`](TELEGRAM_MVP.md). Сценарий после теста оставлен `Inactive`.
