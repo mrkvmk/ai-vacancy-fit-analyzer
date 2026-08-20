@@ -126,6 +126,30 @@ MANUAL_REVIEW с существенными смысловыми замечан�
 
 Защитный QA Router сработал корректно: отсутствие известных строк не было ошибочно превращено в автоматический `PASS`.
 
+## Telegram missing-input test
+
+Для bounded-теста `candidate_data` был временно очищен, а обычный Telegram-текст обеспечил непустой `vacancy_text`. Выполнился маршрут:
+
+```text
+Telegram trigger
+→ input variables
+→ Missing input
+→ error_message
+→ Telegram delivery
+```
+
+History evidence:
+
+```text
+Trigger: Manual
+Duration: less than a second
+Operations: 4
+Credits: 4
+Data size: 1.3 KB
+```
+
+`Both inputs present` был заблокирован, `Tools 3` не прошёл фильтр, а AI отсутствовал в execution log. Бот доставил ожидаемое сообщение о недостающих данных. После фиксации доказательств полный `candidate_data` был восстановлен и сценарий сохранён без повторного запуска.
+
 ## Что проверено, а что ещё нет
 
 Проверено фактически:
@@ -136,11 +160,11 @@ MANUAL_REVIEW с существенными смысловыми замечан�
 - success-вход через `Both inputs present`;
 - AI-вызов;
 - fallback `MANUAL_REVIEW`;
-- отправка предупреждения, QA-сообщения и полного AI-ответа в исходный Telegram chat.
+- отправка предупреждения, QA-сообщения и полного AI-ответа в исходный Telegram chat;
+- missing-input маршрут без AI и доставка `error_message` в Telegram.
 
 Настроено, но пока не прошло отдельный Telegram E2E-тест:
 
-- отправка сообщения из `Missing input`;
 - отправка сообщения из `FAIL`.
 
 ## Ограничения

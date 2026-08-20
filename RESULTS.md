@@ -303,4 +303,18 @@ Data size: 8.7 KB
 Смысловой статус: MANUAL_REVIEW с существенными замечаниями
 ```
 
-Отдельная Telegram-доставка `Missing input` и `FAIL` настроена, но пока не подтверждена самостоятельными E2E-тестами.
+### Telegram missing-input доставка
+
+При временно пустом `candidate_data` выполнены только Telegram trigger, входные переменные, error Tools и Telegram send:
+
+```text
+Trigger: Manual
+Duration: less than a second
+Operations: 4
+Credits: 4
+Data size: 1.3 KB
+```
+
+`Tools 3` был заблокирован, AI отсутствовал в логе. Бот доставил правильный `error_message`. После теста профиль кандидата восстановлен без нового запуска.
+
+Отдельная Telegram-доставка `FAIL` настроена, но пока не подтверждена самостоятельным E2E-тестом.

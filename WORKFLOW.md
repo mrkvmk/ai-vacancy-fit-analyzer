@@ -262,4 +262,4 @@ Input Router → AI → fail-closed QA Router
 8.7 KB
 ```
 
-Отдельные Telegram E2E-тесты доставок `Missing input` и `FAIL` ещё не выполнены. Подробности: [`TELEGRAM_MVP.md`](TELEGRAM_MVP.md).
+Telegram-доставка `Missing input` также подтверждена: менее секунды, `4 operations`, `4 credits`, `1.3 KB`; AI не запускался. Отдельный Telegram E2E-тест доставки `FAIL` ещё не выполнен. Подробности: [`TELEGRAM_MVP.md`](TELEGRAM_MVP.md).

@@ -232,3 +232,47 @@ Telegram trigger
 Технический E2E: PASS
 Смысловой результат: MANUAL_REVIEW
 ```
+
+## Тест-кейс 15 — Telegram missing-input без AI
+
+### Подготовка
+
+- `vacancy_text` mapped из обычного Telegram-сообщения;
+- `candidate_data` временно очищен;
+- после теста полный профиль кандидата восстановлен без повторного запуска.
+
+### Ожидание
+
+- выполняются trigger, входные переменные, error Tools и Telegram error delivery;
+- success-вход, AI и QA gate не запускаются;
+- бот получает сообщение о недостающих данных.
+
+### Фактический результат
+
+```text
+Duration: less than a second
+Operations: 4
+Credits: 4
+Data size: 1.3 KB
+```
+
+Execution log:
+
+- `Telegram Bot — Watch Updates` completed;
+- `Tools — Set multiple variables` completed;
+- missing-input `Tools` completed;
+- `Telegram Bot — Send a Text Message or a Reply` completed;
+- success `Tools 3` did not pass the filter;
+- AI отсутствовал в логе.
+
+Полученный текст:
+
+```text
+Не хватает данных вакансии или кандидата. Полный AI-анализ не запущен. Пришлите недостающий текст, файл или читаемые скриншоты.
+```
+
+### Вердикт
+
+```text
+PASS
+```

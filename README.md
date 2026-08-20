@@ -173,7 +173,8 @@ Set multiple variables → Router
 - Small и Medium улучшали отдельные вердикты, но оба выдавали смысловые нарушения; автоматический semantic `PASS` признан небезопасным;
 - добавлен fail-closed QA gate: известные паттерны → `FAIL`, остальные ответы → `MANUAL_REVIEW`;
 - обе QA-ветки подтверждены реальными запусками; одновременно выполнялась ровно одна ветка;
-- Telegram trigger и доставка `MANUAL_REVIEW` подтверждены реальным end-to-end запуском: `11 seconds`, `6 operations`, `6.94 credits`, `8.7 KB`.
+- Telegram trigger и доставка `MANUAL_REVIEW` подтверждены реальным end-to-end запуском: `11 seconds`, `6 operations`, `6.94 credits`, `8.7 KB`;
+- Telegram `Missing input` подтверждён отдельно: менее секунды, `4 operations`, `4 credits`, `1.3 KB`, AI не запускался.
 
 Подробная архитектура, модельное сравнение и execution evidence: [`MAKE_MVP.md`](MAKE_MVP.md).
 
@@ -212,7 +213,7 @@ Set multiple variables → Router
 
 - расширить тестирование версии `1.3` на новых типах вакансий;
 - сравнить более сильную модель или независимый semantic QA с текущим `MANUAL_REVIEW`-процессом;
-- добавить Telegram-приветствие без AI и отдельно проверить доставки `Missing input` и `FAIL`;
+- добавить Telegram-приветствие без AI и отдельно проверить доставку `FAIL`;
 - принимать ссылку через Telegram;
 - автоматически извлекать текст вакансии;
 - сохранять анализ в выбранном хранилище;
