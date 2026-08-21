@@ -1,8 +1,8 @@
-# AI Vacancy Fit Analyzer — Workflow v1.0
+# AI Vacancy Fit Analyzer — Workflow v1.1
 
 ## Статус
 
-Workflow реализован как ручной no-code MVP и отдельный Telegram MVP в Make. Router, технические фильтры, AI-ветка, fail-closed QA gate, Telegram trigger и доставка `MANUAL_REVIEW` фактически протестированы. Автоматическое извлечение данных и сохранение в Google Docs пока не реализованы.
+Workflow реализован как ручной no-code MVP и отдельный Telegram MVP в Make. Router, технические фильтры, AI-ветка, fail-closed QA gate, Telegram trigger, двухшаговое извлечение карточек `trudvsem.ru` и доставка фактически протестированы. Извлечение hh.ru и сохранение в Google Docs пока не реализованы.
 
 Подробности реализации и execution evidence: [`MAKE_MVP.md`](MAKE_MVP.md).
 
@@ -315,3 +315,36 @@ Data size: 1.7 KB
 ```
 
 `/start` автоматически прошёл trigger, owner filter, input Tools и Telegram welcome. Missing-input и AI-entry Tools были заблокированы; AI отсутствовал. Beta предназначена только для личного использования и обязательной ручной проверки `MANUAL_REVIEW`.
+
+## Работа России — two-step link reader
+
+Owner-only Telegram route распознаёт одну карточку `trudvsem.ru`:
+
+```regex
+^https?://(?:www\.)?trudvsem\.ru/vacancy/card/[^/?#]+/[^/?#]+(?:[?#]\S*)?$
+```
+
+Named regex groups `company_id` и `vacancy_id` формируют официальный endpoint:
+
+```text
+https://opendata.trudvsem.ru/api/v1/vacancies/vacancy/{company_id}/{vacancy_id}
+```
+
+HTTP response парсится как JSON. В `vacancy_text` включаются только `job-name`, `company.name`, `region.name`, `salary`, `schedule`, `qualification`, `requirements`, `duty`, `requirement.education`, `requirement.experience` и `vac_url`. `contact_list`, `contact_person` и email исключены.
+
+Маршруты взаимоисключающие: valid trudvsem link не входит ни в AI route, ни в command/short welcome. Link route возвращает извлечённый текст и просит отправить его отдельным сообщением для существующего AI/QA flow. Автоматического one-step AI-call для ссылки нет.
+
+Проверенный output: `2,069` символов, `11/11` labels, без email и телефона. Поле `qualification` в source API уже заканчивалось на `эк` при длине 200 символов; это source-data limitation, не truncation mapping.
+
+Manual и active Instant E2E дали одинаковые metrics:
+
+```text
+Duration: 6 seconds
+Operations: 6
+Credits: 6
+Data size: 18.2 KB
+```
+
+Выполнились trigger → input Tools → parser → HTTP → safe-text Tools → Telegram delivery. Missing-input, AI-entry, command/welcome и QA delivery routes были заблокированы; AI отсутствовал.
+
+hh.ru отдельно проверялся в inactive `Vacancy Link Reader Lab`: direct/API access из cloud environments получил timeout/`403`, а reader вернул tracker/forbidden content. Эти результаты не интерпретируются как несуществующая вакансия; hh.ru extraction остаётся unsupported.

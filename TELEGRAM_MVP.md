@@ -2,7 +2,7 @@
 
 ## Статус
 
-Telegram-версия сценария собрана как отдельная копия проверенного ручного Make MVP и протестирована реальным сообщением с текстом вакансии.
+Telegram-версия сценария собрана как отдельная копия проверенного ручного Make MVP и протестирована реальными сообщениями с текстом вакансии и карточкой `trudvsem.ru`.
 
 После завершения guards сценарий активирован как owner-only personal beta; `Immediately as data arrives` включён.
 
@@ -23,13 +23,19 @@ Input Router
   ├─ Missing input
   │    → error_message
   │    → Telegram: сообщение об ошибке
-  └─ Command / vacancy Router
+  └─ Command / vacancy / link Router
+       ├─ valid `trudvsem.ru/vacancy/card/{company_id}/{vacancy_id}` link
+       │    → Text parser: named company_id + vacancy_id
+       │    → Open Data HTTP GET
+       │    → safe vacancy_text without contacts
+       │    → Telegram: extracted text + resend instruction, no AI
        ├─ vacancy_text Starts with "/"
-       │  OR vacancy_text Does not match `^[\s\S]{100,}$`
+       │  OR short non-link text
        │    → Telegram: приветствие без AI
        └─ оба input заполнены
           AND vacancy_text Does not start with "/"
           AND vacancy_text Matches `^[\s\S]{100,}$`
+          AND vacancy_text Does not match valid trudvsem link
             → validation_status
             → Make AI Toolkit
             → QA Router
@@ -65,10 +71,14 @@ Data size: 494.0 B
 ```text
 AI route:
 vacancy_text Matches ^[\s\S]{100,}$
+AND vacancy_text Does not match valid trudvsem link
+
+link route:
+vacancy_text Matches valid trudvsem link
 
 welcome route:
 vacancy_text Starts with "/"
-OR vacancy_text Does not match ^[\s\S]{100,}$
+OR vacancy_text Does not match (valid trudvsem link OR ^[\s\S]{100,}$)
 ```
 
 Реальное некомандное сообщение `Привет` прошло welcome route:
@@ -299,7 +309,35 @@ AI Answer содержал required phrase, значит новое condition б
 - missing-input маршрут без AI и доставка `error_message` в Telegram;
 - текущая vacancy route через AI, `FAIL` Tools и Telegram block delivery без показа AI Answer.
 
-Все четыре пользовательских Telegram path подтверждены отдельными реальными тестами: welcome, missing input, `MANUAL_REVIEW` и `FAIL`.
+Все пять пользовательских Telegram path подтверждены отдельными реальными тестами: welcome, missing input, `MANUAL_REVIEW`, `FAIL` и `trudvsem.ru` extraction.
+
+## Двухшаговый link reader — Работа России
+
+Поддерживается одна карточка вида `https://trudvsem.ru/vacancy/card/{company_id}/{vacancy_id}`. Parser извлекает оба ID именованными regex groups и вызывает официальный Open Data endpoint. HTTP JSON превращается в `vacancy_text` только из non-contact fields; email, `contact_list` и `contact_person` не маппятся.
+
+Проверенный output содержал `2,069` символов и `11/11` labels; email/phone отсутствовали. Source API ограничил `qualification` 200 символами и уже вернул окончание `эк`.
+
+Двухшаговый UX:
+
+```text
+owner sends trudvsem link
+→ bot returns extracted vacancy text without AI
+→ owner copies text and sends it as a separate message
+→ existing long-text AI/QA route
+```
+
+Manual и Instant E2E дали одинаковые metrics:
+
+```text
+Duration: 6 seconds
+Operations: 6
+Credits: 6
+Data size: 18.2 KB
+```
+
+В обоих тестах parser, HTTP, safe-text Tools и Telegram delivery completed. Missing-input, AI-entry, welcome, FAIL и MANUAL_REVIEW routes не выполнялись; AI отсутствовал.
+
+hh.ru не поддерживается: inactive lab зафиксировал cloud timeout/`403`, а reader не получил vacancy content. Это source-access blocker, а не доказательство отсутствия вакансии.
 
 ## Сводная test matrix
 
@@ -309,6 +347,8 @@ AI Answer содержал required phrase, значит новое condition б
 | Live `/start` personal beta (Instant) | < 1 s | 3 | 3 | 1.7 KB | No |
 | Short non-command guard | < 1 s | 3 | 3 | 1.7 KB | No |
 | Owner deny-path | < 1 s | 1 | 1 | 494.0 B | No |
+| `trudvsem.ru` extraction (Manual) | 6 s | 6 | 6 | 18.2 KB | No |
+| `trudvsem.ru` extraction (Instant) | 6 s | 6 | 6 | 18.2 KB | No |
 | No-offer presence case → FAIL on old patterns | 9 s | 6 | 6.86 | 5.3 KB | Yes, answer blocked |
 | Missing input | < 1 s | 4 | 4 | 1.3 KB | No |
 | MANUAL_REVIEW baseline | 11 s | 6 | 6.94 | 8.7 KB | Yes |
@@ -336,9 +376,9 @@ Execution path: Telegram trigger → owner filter → input Tools → command/we
 ## Ограничения
 
 - профиль кандидата пока статически хранится в Make;
-- бот принимает текст вакансии, но не читает ссылки, PDF или изображения;
+- бот читает только карточки `trudvsem.ru`; hh.ru, другие сайты, PDF и изображения не поддерживаются;
 - команды получают одно общее приветствие; отдельные ответы для `/help` и неизвестных команд пока не реализованы;
-- Telegram-сценарий активен как owner-only personal beta; каждое owner message длиной от 100 символов без `/` может потратить AI credits;
+- Telegram-сценарий активен как owner-only personal beta; каждый длинный non-link owner input без `/` может потратить AI credits;
 - слишком длинный AI-ответ потенциально может превысить лимит одного Telegram-сообщения;
 - детерминированный QA gate ищет известные строки, но не заменяет смысловую проверку;
 - bot token, webhook URL и служебные ID не публикуются.

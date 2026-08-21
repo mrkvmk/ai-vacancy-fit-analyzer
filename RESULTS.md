@@ -401,3 +401,20 @@ Data size: 1.7 KB
 ```
 
 Trigger, input Tools и Telegram welcome completed; missing-input и AI-entry Tools blocked; AI отсутствовал. Это подтверждает фактическую постоянную активацию, а не только состояние UI toggle.
+
+### Two-step `trudvsem.ru` link reader
+
+Inactive lab подтвердил named parser output (`company_id`, `vacancy_id`), официальный Open Data HTTP `200` и safe `vacancy_text`: `2,069` символов, `11/11` labels, без email/phone. Source `qualification` сам был ограничен 200 символами и уже заканчивался на `эк`; mapping не обрезал его дополнительно.
+
+Telegram Manual и Instant E2E оба вернули extracted vacancy text:
+
+```text
+Duration: 6 seconds
+Operations: 6
+Credits: 6
+Data size: 18.2 KB
+```
+
+Выполнились trigger, input Tools, Text parser, HTTP, safe-text Tools и Telegram delivery. Missing-input, AI-entry, welcome и QA delivery routes были blocked; AI отсутствовал. После formatting cleanup active Instant message содержал пробелы после labels и separator перед resend instruction.
+
+hh.ru lab не дал vacancy content: direct/API cloud calls получили timeout/`403`, reader вернул tracker/forbidden response. Поэтому поддержка ограничена проверенным `trudvsem.ru` source.

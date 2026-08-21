@@ -539,3 +539,63 @@ Data size: 1.7 KB
 ```text
 PASS
 ```
+
+## Тест-кейс 23 — Two-step `trudvsem.ru` link reader
+
+### Предусловия
+
+- owner allowlist включён;
+- valid link route взаимоисключающая с AI и welcome routes;
+- Open Data HTTP response парсится;
+- contact/email fields не маппятся.
+
+### Вход
+
+Одна публичная карточка `trudvsem.ru/vacancy/card/{company_id}/{vacancy_id}` из owner chat.
+
+### Ожидание
+
+- parser извлекает оба ID;
+- HTTP возвращает parsed vacancy JSON;
+- Telegram получает safe extracted text;
+- AI, welcome, missing-input и QA delivery routes не выполняются.
+
+### Manual run
+
+```text
+Trigger: Manual
+Duration: 6 seconds
+Operations: 6
+Credits: 6
+Data size: 18.2 KB
+```
+
+### Active run
+
+```text
+Trigger: Instant
+Duration: 6 seconds
+Operations: 6
+Credits: 6
+Data size: 18.2 KB
+```
+
+### Output QA
+
+```text
+Characters: 2069
+Required labels: 11/11
+Email: absent
+Phone: absent
+AI: absent
+```
+
+`qualification` source field имел длину 200 символов и уже заканчивался на `эк`; mapping не обрезал его дополнительно. Active output содержал пробелы после labels и separator перед инструкцией повторной отправки.
+
+### Вердикт
+
+```text
+PASS
+```
+
+Ограничение: это двухшаговый flow только для `trudvsem.ru`. hh.ru и другие sources не считаются поддержанными.

@@ -4,7 +4,7 @@
 
 Ручной no-code-прототип AI Vacancy Fit Analyzer собран и фактически протестирован в Make 20 августа 2026 года.
 
-Прототип подтверждает маршрутизацию входных данных, блокировку дорогого AI-шага при отсутствии обязательного input и создание понятного fallback-сообщения. Это не готовый пользовательский сервис: Telegram trigger, автоматическое извлечение вакансии, доставка результата и постоянное хранилище пока не реализованы.
+Исходный ручной прототип подтверждает маршрутизацию входных данных, блокировку дорогого AI-шага при отсутствии обязательного input и создание понятного fallback-сообщения. На этом ручном этапе Telegram trigger, автоматическое извлечение вакансии, доставка результата и постоянное хранилище ещё не были реализованы; последующие Telegram и link-reader extensions описаны ниже.
 
 Сценарий во время тестирования оставался `Inactive`; расписание было выключено.
 
@@ -401,3 +401,21 @@ Data size: 1.7 KB
 ```
 
 Выполнились Telegram trigger, input Tools и welcome delivery. Missing-input и AI-entry Tools были заблокированы, AI отсутствовал. Исходный ручной Make MVP остаётся отдельным inactive regression baseline; активна только owner-only Telegram personal beta.
+
+## Vacancy Link Reader Lab и Telegram extension
+
+Отдельный `Vacancy Link Reader Lab` оставлен inactive. hh.ru direct/API probes получили timeout/`403`, Jina reader вернул tracker/forbidden content, поэтому автоматическое чтение hh.ru не заявляется.
+
+Для карточки `trudvsem.ru` официальный composite Open Data endpoint вернул HTTP `200` и parsed JSON. Named regex parser извлёк точные `company_id` и `vacancy_id`; parser operation: `1 credit`, `84 B`. Safe Tools mapping сформировал `vacancy_text` из 11 полей без contact/email data: `2,069` символов, `11/11` labels, email/phone absent.
+
+Telegram extension использует mutually exclusive route:
+
+```text
+valid trudvsem link
+→ Text parser
+→ dynamic Open Data HTTP GET
+→ safe vacancy_text
+→ Telegram extraction delivery
+```
+
+Manual и Instant E2E: `6 seconds`, `6 operations`, `6 credits`, `18.2 KB`. AI-entry Tools, welcome и missing-input были blocked; AI отсутствовал. Это двухшаговый flow: пользователь копирует extracted vacancy text и отправляет его отдельным сообщением в существующий AI/QA route.
