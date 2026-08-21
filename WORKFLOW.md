@@ -282,7 +282,7 @@ Telegram `FAIL` на текущей Router-архитектуре подтвер
 
 ## Owner allowlist и minimum-length guard
 
-Chat ID владельца хранится только как literal внутри Make filter и не публикуется. Положительный authorized-path test подтверждён, но отрицательный тест с другим Chat ID ещё не выполнялся.
+Chat ID владельца хранится только как literal внутри Make filter и не публикуется. Проверены обе стороны allowlist: owner message прошёл filter; сообщение из другого Telegram chat остановлено до Tools и AI, а отправитель не получил ответа. Deny-run: менее секунды, `1 operation`, `1 credit`, `494.0 B`.
 
 Короткое некомандное сообщение `Привет` было перенаправлено в welcome без AI: менее секунды, `3 operations`, `3 credits`, `1.7 KB`. Длинная учебная вакансия прошла текущий guarded AI path в `MANUAL_REVIEW`: `9 seconds`, `6 operations`, `6.89 credits`, `8.9 KB`.
 

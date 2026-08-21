@@ -367,6 +367,6 @@ welcome route:
   OR vacancy_text Does not match ^[\s\S]{100,}$
 ```
 
-Положительный owner-path и short-text guard подтверждены сообщением `Привет`: менее секунды, `3 operations`, `3 credits`, `1.7 KB`; Telegram welcome выполнен, AI отсутствовал. Отклонение чужого Chat ID пока не тестировалось.
+Положительный owner-path и short-text guard подтверждены сообщением `Привет`: менее секунды, `3 operations`, `3 credits`, `1.7 KB`; Telegram welcome выполнен, AI отсутствовал. Отдельный deny-run из другого Telegram chat также подтверждён: менее секунды, `1 operation`, `1 credit`, `494.0 B`; bundle заблокирован до Tools, downstream и AI отсутствовали, ответ отправителю не пришёл.
 
 Длинная вакансия прошла guarded AI path: `9 seconds`, `6 operations`, `6.89 credits`, `8.9 KB`; выполнилась только delivery `MANUAL_REVIEW`. Технический результат — `PASS`, внешний semantic QA AI Answer — `FAIL`. Сценарий оставлен `Inactive`.

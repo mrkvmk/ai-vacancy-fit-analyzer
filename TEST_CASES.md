@@ -392,7 +392,7 @@ Credits: 3
 Data size: 1.7 KB
 ```
 
-Trigger, input Tools и Telegram welcome completed; missing-input и success Tools blocked; AI отсутствовал. Authorized path — `PASS`. Deny-path с другим Chat ID не тестировался.
+Trigger, input Tools и Telegram welcome completed; missing-input и success Tools blocked; AI отсутствовал. Authorized path — `PASS`.
 
 ## Тест-кейс 19 — Guarded vacancy text длиннее 100 символов
 
@@ -426,3 +426,37 @@ External semantic QA: FAIL
 ```
 
 Semantic defects: обязанность внедрения превращена в требование прошлого опыта; придуманы риск и обучение; повторно запрошены известные город/формат; offer verdict не отражает отсутствие реального предложения; self-reported QA не считается независимым.
+
+## Тест-кейс 20 — Owner allowlist deny-path
+
+### Вход
+
+```text
+Привет
+```
+
+Сообщение отправлено из другого Telegram chat. Ни один Chat ID не включён в документацию.
+
+### Ожидание
+
+- Telegram trigger получает update;
+- owner filter пропускает `0` bundles;
+- Tools и AI не запускаются;
+- отправитель не получает ответа.
+
+### Фактический результат
+
+```text
+Duration: less than a second
+Operations: 1
+Credits: 1
+Data size: 494.0 B
+```
+
+Выполнился только Telegram trigger. Input Tools did not pass the filter; все downstream-модули отсутствовали в execution path. На втором Telegram-аккаунте ответа не было.
+
+### Вердикт
+
+```text
+PASS
+```

@@ -356,7 +356,9 @@ Credits: 3
 Data size: 1.7 KB
 ```
 
-Выполнились trigger, input Tools и Telegram welcome; AI отсутствовал. Блокировка сообщения с неразрешённого Chat ID пока не проверялась.
+Выполнились trigger, input Tools и Telegram welcome; AI отсутствовал.
+
+Отдельный deny-run из другого Telegram chat подтвердил owner filter: trigger выполнился, filter пропустил `0` bundles, Tools и AI отсутствовали, ответ не был отправлен. Метрики: менее секунды, `1 operation`, `1 credit`, `494.0 B`.
 
 ### Guarded long-text MANUAL_REVIEW
 

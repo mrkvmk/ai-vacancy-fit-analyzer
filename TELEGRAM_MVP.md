@@ -47,7 +47,18 @@ Input Router
 
 Входной filter принимает непустой текст только при совпадении `Message.Chat.ID` с owner allowlist literal. Значение Chat ID хранится только в Make и не включено в screenshots, документацию или GitHub.
 
-Положительный authorized-path test подтверждён: owner message прошёл filter. Отрицательный тест сообщения с другого Chat ID пока не выполнялся, поэтому блокировка постороннего пользователя остаётся configured-but-unverified.
+Allowlist проверен в обе стороны. Owner message прошёл filter. Сообщение `Привет` из другого Telegram chat было принято trigger, но filter пропустил `0` bundles; Tools, Router, AI и delivery не выполнялись, ответ отправителю не пришёл.
+
+Deny-path History evidence:
+
+```text
+Duration: less than a second
+Operations: 1
+Credits: 1
+Data size: 494.0 B
+```
+
+Ни owner Chat ID, ни Chat ID тестового отправителя не опубликованы.
 
 Чтобы короткие сообщения не тратили AI credits, Router использует границу 100 символов:
 
@@ -268,6 +279,7 @@ AI Answer пользователю не отправлялся. После фи�
 |---|---:|---:|---:|---:|---|
 | `/start` welcome | < 1 s | 3 | 3 | 1.7 KB | No |
 | Short non-command guard | < 1 s | 3 | 3 | 1.7 KB | No |
+| Owner deny-path | < 1 s | 1 | 1 | 494.0 B | No |
 | Missing input | < 1 s | 4 | 4 | 1.3 KB | No |
 | MANUAL_REVIEW baseline | 11 s | 6 | 6.94 | 8.7 KB | Yes |
 | Guarded MANUAL_REVIEW | 9 s | 6 | 6.89 | 8.9 KB | Yes |
@@ -279,7 +291,6 @@ AI Answer пользователю не отправлялся. После фи�
 - бот принимает текст вакансии, но не читает ссылки, PDF или изображения;
 - команды получают одно общее приветствие; отдельные ответы для `/help` и неизвестных команд пока не реализованы;
 - Telegram-сценарий не активирован для постоянной работы;
-- owner authorized path подтверждён, но deny-path с другим Chat ID пока не проверен;
 - слишком длинный AI-ответ потенциально может превысить лимит одного Telegram-сообщения;
 - детерминированный QA gate ищет известные строки, но не заменяет смысловую проверку;
 - bot token, webhook URL и служебные ID не публикуются.
