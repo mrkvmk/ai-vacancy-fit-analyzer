@@ -1,4 +1,4 @@
-# AI Vacancy Fit Analyzer — Workflow v0.9
+# AI Vacancy Fit Analyzer — Workflow v1.0
 
 ## Статус
 
@@ -301,3 +301,17 @@ Chat ID владельца хранится только как literal внут
 Правило применимо к текущему Telegram MVP, потому что его input не содержит данных о реальном предложении о работе.
 
 Bounded presence-case run: `9 seconds`, `6 operations`, `6.86 credits`, `5.3 KB`. AI написал обязательную фразу, поэтому новое condition было false. Общий FAIL корректно вызвали существующие паттерны `junior` и `стажиров`; пользователю отправлено только блокирующее сообщение. Isolated case без обязательной фразы и без старых совпадений пока не проверен.
+
+## Active personal beta
+
+Telegram-сценарий включён в режиме `Immediately as data arrives` после owner allow/deny, short/long input, MANUAL_REVIEW, FAIL и structural QA tests. Live smoke выполнялся без `Run once`:
+
+```text
+Trigger: Instant
+Duration: less than a second
+Operations: 3
+Credits: 3
+Data size: 1.7 KB
+```
+
+`/start` автоматически прошёл trigger, owner filter, input Tools и Telegram welcome. Missing-input и AI-entry Tools были заблокированы; AI отсутствовал. Beta предназначена только для личного использования и обязательной ручной проверки `MANUAL_REVIEW`.

@@ -347,7 +347,7 @@ Data size: 3.8 KB
 
 Контролируемый Telegram FAIL run на текущей Router-архитектуре выполнил trigger, input Tools, success marker, AI, FAIL Tools и Telegram block delivery: `17 seconds`, `6 operations`, `6.85 credits`, `5.7 KB`. `MANUAL_REVIEW` не выполнялся, а AI Answer не отправлялся пользователю. Временный паттерн `Статус данных` после фиксации доказательств удалён; filter и scenario сохранены без повторного запуска.
 
-Полный поток и ограничения описаны в [`TELEGRAM_MVP.md`](TELEGRAM_MVP.md). Сценарий после теста оставлен `Inactive`.
+Полный поток и ограничения описаны в [`TELEGRAM_MVP.md`](TELEGRAM_MVP.md). На этом этапе сценарий оставался `Inactive`; после последующих owner/length/QA guards он был отдельно активирован как personal beta.
 
 ## Owner allowlist и minimum-length guard
 
@@ -387,3 +387,17 @@ Data size: 5.3 KB
 ```
 
 AI Answer содержал точную строку `Предложение: пока недостаточно информации`, поэтому новый `Does not contain` condition был false. FAIL route всё равно выполнился из-за двух старых паттернов: `junior` и `стажиров`. Telegram отправил только block message; MANUAL_REVIEW был заблокирован. Отсутствие required phrase без других совпадений пока не тестировалось изолированно.
+
+## Active personal beta smoke test
+
+После завершения guards Telegram-сценарий переключён в `Immediately as data arrives`. Активация сама по себе не создала execution. Затем owner отправил `/start` без `Run once`:
+
+```text
+Trigger: Instant
+Duration: less than a second
+Operations: 3
+Credits: 3
+Data size: 1.7 KB
+```
+
+Выполнились Telegram trigger, input Tools и welcome delivery. Missing-input и AI-entry Tools были заблокированы, AI отсутствовал. Исходный ручной Make MVP остаётся отдельным inactive regression baseline; активна только owner-only Telegram personal beta.

@@ -4,7 +4,7 @@
 
 Telegram-версия сценария собрана как отдельная копия проверенного ручного Make MVP и протестирована реальным сообщением с текстом вакансии.
 
-Сценарий после теста оставлен `Inactive`; instant scheduling выключен.
+После завершения guards сценарий активирован как owner-only personal beta; `Immediately as data arrives` включён.
 
 ## Пользовательский поток
 
@@ -305,7 +305,8 @@ AI Answer содержал required phrase, значит новое condition б
 
 | Path | Duration | Operations | Credits | Data size | AI |
 |---|---:|---:|---:|---:|---|
-| `/start` welcome | < 1 s | 3 | 3 | 1.7 KB | No |
+| `/start` welcome (manual baseline) | < 1 s | 3 | 3 | 1.7 KB | No |
+| Live `/start` personal beta (Instant) | < 1 s | 3 | 3 | 1.7 KB | No |
 | Short non-command guard | < 1 s | 3 | 3 | 1.7 KB | No |
 | Owner deny-path | < 1 s | 1 | 1 | 494.0 B | No |
 | No-offer presence case → FAIL on old patterns | 9 s | 6 | 6.86 | 5.3 KB | Yes, answer blocked |
@@ -314,12 +315,30 @@ AI Answer содержал required phrase, значит новое condition б
 | Guarded MANUAL_REVIEW | 9 s | 6 | 6.89 | 8.9 KB | Yes |
 | FAIL | 17 s | 6 | 6.85 | 5.7 KB | Yes, answer blocked |
 
+## Активация personal beta
+
+После проверки owner allow/deny, minimum length, MANUAL_REVIEW, FAIL и permanent structural rule включён режим `Immediately as data arrives`. Переключение не запустило scenario само по себе.
+
+Owner отправил `/start` без `Run once`. Бот автоматически доставил welcome, а History показал:
+
+```text
+Trigger: Instant
+Duration: less than a second
+Operations: 3
+Credits: 3
+Data size: 1.7 KB
+```
+
+Execution path: Telegram trigger → owner filter → input Tools → command/welcome route → Telegram delivery. Missing-input и AI-entry Tools были заблокированы; AI отсутствовал.
+
+Активная beta остаётся fail-closed: автоматического semantic PASS нет, MANUAL_REVIEW требует человеческой проверки, а другой Chat ID блокируется до Tools и AI.
+
 ## Ограничения
 
 - профиль кандидата пока статически хранится в Make;
 - бот принимает текст вакансии, но не читает ссылки, PDF или изображения;
 - команды получают одно общее приветствие; отдельные ответы для `/help` и неизвестных команд пока не реализованы;
-- Telegram-сценарий не активирован для постоянной работы;
+- Telegram-сценарий активен как owner-only personal beta; каждое owner message длиной от 100 символов без `/` может потратить AI credits;
 - слишком длинный AI-ответ потенциально может превысить лимит одного Telegram-сообщения;
 - детерминированный QA gate ищет известные строки, но не заменяет смысловую проверку;
 - bot token, webhook URL и служебные ID не публикуются.

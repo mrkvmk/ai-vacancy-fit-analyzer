@@ -387,3 +387,17 @@ Data size: 5.3 KB
 ```
 
 Фактический Answer содержал обязательную фразу, поэтому новое condition было false. FAIL корректно вызвали старые паттерны `junior` и `стажиров`; AI Answer пользователю не отправлялся. Проверка отсутствующей фразы без одновременных старых нарушений остаётся configured-but-not-isolated.
+
+### Active personal beta — Instant `/start`
+
+После включения `Immediately as data arrives` owner отправил `/start` без `Run once`:
+
+```text
+Trigger: Instant
+Duration: less than a second
+Operations: 3
+Credits: 3
+Data size: 1.7 KB
+```
+
+Trigger, input Tools и Telegram welcome completed; missing-input и AI-entry Tools blocked; AI отсутствовал. Это подтверждает фактическую постоянную активацию, а не только состояние UI toggle.

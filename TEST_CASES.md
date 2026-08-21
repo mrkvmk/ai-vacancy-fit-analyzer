@@ -500,3 +500,42 @@ Required phrase presence: PASS
 Existing forbidden-pattern detection: PASS
 Isolated missing-phrase detection: NOT TESTED
 ```
+
+## Тест-кейс 22 — Active personal beta Instant `/start`
+
+### Предусловия
+
+- owner allow/deny paths verified;
+- `Immediately as data arrives` включён;
+- `Run once` не используется.
+
+### Вход
+
+```text
+/start
+```
+
+### Ожидание
+
+- History trigger = `Instant`;
+- owner filter проходит;
+- welcome доставляется автоматически;
+- AI не запускается.
+
+### Фактический результат
+
+```text
+Trigger: Instant
+Duration: less than a second
+Operations: 3
+Credits: 3
+Data size: 1.7 KB
+```
+
+Выполнились trigger, input Tools и Telegram welcome. Missing-input и AI-entry Tools были заблокированы, AI отсутствовал.
+
+### Вердикт
+
+```text
+PASS
+```
