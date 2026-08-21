@@ -372,3 +372,18 @@ Data size: 8.9 KB
 ```
 
 Технический route — `PASS`: short-text и FAIL paths заблокированы, AI и `MANUAL_REVIEW` delivery выполнились ровно один раз. Внешний semantic QA — `FAIL`: модель превратила обязанность внедрения в требование прошлого опыта, придумала соответствующий риск и обучение, повторно запросила подтверждённые город/формат, использовала неверный offer verdict и допустила языковую ошибку.
+
+### Required no-offer verdict — presence case
+
+Permanent QA gate дополнен условием `Answer Does not contain "Предложение: пока недостаточно информации" → FAIL`.
+
+Bounded run:
+
+```text
+Duration: 9 seconds
+Operations: 6
+Credits: 6.86
+Data size: 5.3 KB
+```
+
+Фактический Answer содержал обязательную фразу, поэтому новое condition было false. FAIL корректно вызвали старые паттерны `junior` и `стажиров`; AI Answer пользователю не отправлялся. Проверка отсутствующей фразы без одновременных старых нарушений остаётся configured-but-not-isolated.

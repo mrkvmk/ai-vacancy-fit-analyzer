@@ -258,15 +258,19 @@ AI Answer
 Production-паттерны:
 
 ```text
-junior
-стажиров
-ментор
-примеры проектов внедрения
-+ причина + следующий шаг
-можно принимать /
+Contains (case insensitive):
+- junior
+- стажиров
+- ментор
+- примеры проектов внедрения
+- + причина + следующий шаг
+- можно принимать /
+
+Does not contain (case insensitive):
+- Предложение: пока недостаточно информации
 ```
 
-Одна фраза хранится в одном OR-условии. Gate использует mapped `Answer` из Make AI Toolkit и оператор `Contains (case insensitive)`.
+Каждая проверка хранится в отдельном OR-условии. Gate использует mapped `Answer` из Make AI Toolkit. Последнее правило требует no-offer verdict, потому что текущий Telegram input не содержит реального предложения о работе.
 
 ### MANUAL_REVIEW test
 
@@ -370,3 +374,16 @@ welcome route:
 Положительный owner-path и short-text guard подтверждены сообщением `Привет`: менее секунды, `3 operations`, `3 credits`, `1.7 KB`; Telegram welcome выполнен, AI отсутствовал. Отдельный deny-run из другого Telegram chat также подтверждён: менее секунды, `1 operation`, `1 credit`, `494.0 B`; bundle заблокирован до Tools, downstream и AI отсутствовали, ответ отправителю не пришёл.
 
 Длинная вакансия прошла guarded AI path: `9 seconds`, `6 operations`, `6.89 credits`, `8.9 KB`; выполнилась только delivery `MANUAL_REVIEW`. Технический результат — `PASS`, внешний semantic QA AI Answer — `FAIL`. Сценарий оставлен `Inactive`.
+
+### No-offer structural QA presence test
+
+После добавления required verdict rule один bounded vacancy run дал:
+
+```text
+Duration: 9 seconds
+Operations: 6
+Credits: 6.86
+Data size: 5.3 KB
+```
+
+AI Answer содержал точную строку `Предложение: пока недостаточно информации`, поэтому новый `Does not contain` condition был false. FAIL route всё равно выполнился из-за двух старых паттернов: `junior` и `стажиров`. Telegram отправил только block message; MANUAL_REVIEW был заблокирован. Отсутствие required phrase без других совпадений пока не тестировалось изолированно.

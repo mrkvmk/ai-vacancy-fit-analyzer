@@ -460,3 +460,43 @@ Data size: 494.0 B
 ```text
 PASS
 ```
+
+## Тест-кейс 21 — Required no-offer verdict, presence case
+
+### Production rule
+
+```text
+4.Answer
+Does not contain (case insensitive)
+Предложение: пока недостаточно информации
+→ FAIL
+```
+
+### Вход
+
+Та же учебная вакансия длиннее 100 символов; данных о реальном предложении нет.
+
+### Фактический результат
+
+```text
+Duration: 9 seconds
+Operations: 6
+Credits: 6.86
+Data size: 5.3 KB
+```
+
+AI Answer содержал:
+
+```text
+Предложение: пока недостаточно информации
+```
+
+Следовательно, новое `Does not contain` condition было false. При этом Answer содержал `junior-уровню` и `обучения/стажировки`; существующие паттерны `junior` и `стажиров` направили bundle в FAIL. Выполнились FAIL Tools и Telegram block delivery, MANUAL_REVIEW не выполнялся.
+
+### Вердикт
+
+```text
+Required phrase presence: PASS
+Existing forbidden-pattern detection: PASS
+Isolated missing-phrase detection: NOT TESTED
+```

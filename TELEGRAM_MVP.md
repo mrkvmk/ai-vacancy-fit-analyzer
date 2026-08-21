@@ -256,6 +256,34 @@ Missing-input и command routes были заблокированы. `MANUAL_REV
 
 AI Answer пользователю не отправлялся. После фиксации operation bubbles, сообщения и History metrics временный `Статус данных` был удалён. В production filter остались только постоянные паттерны; сценарий сохранён без повторного запуска.
 
+## Required no-offer verdict guard
+
+Текущий MVP получает вакансию и профиль кандидата, но не получает данные о реальном job offer. Поэтому production QA filter требует:
+
+```text
+Answer contains:
+Предложение: пока недостаточно информации
+```
+
+Реализация fail-closed:
+
+```text
+Answer Does not contain (case insensitive)
+Предложение: пока недостаточно информации
+→ FAIL
+```
+
+Presence-case evidence:
+
+```text
+Duration: 9 seconds
+Operations: 6
+Credits: 6.86
+Data size: 5.3 KB
+```
+
+AI Answer содержал required phrase, значит новое condition было false. FAIL был вызван существующими `junior` и `стажиров`, которые AI выдумал в том же блоке. Пользователь получил только FAIL block message; AI Answer не доставлялся. Isolated missing-phrase case без других forbidden patterns ещё не выполнялся.
+
 ## Что проверено, а что ещё нет
 
 Проверено фактически:
@@ -280,6 +308,7 @@ AI Answer пользователю не отправлялся. После фи�
 | `/start` welcome | < 1 s | 3 | 3 | 1.7 KB | No |
 | Short non-command guard | < 1 s | 3 | 3 | 1.7 KB | No |
 | Owner deny-path | < 1 s | 1 | 1 | 494.0 B | No |
+| No-offer presence case → FAIL on old patterns | 9 s | 6 | 6.86 | 5.3 KB | Yes, answer blocked |
 | Missing input | < 1 s | 4 | 4 | 1.3 KB | No |
 | MANUAL_REVIEW baseline | 11 s | 6 | 6.94 | 8.7 KB | Yes |
 | Guarded MANUAL_REVIEW | 9 s | 6 | 6.89 | 8.9 KB | Yes |
