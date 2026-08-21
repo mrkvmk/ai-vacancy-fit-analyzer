@@ -1,4 +1,4 @@
-# AI Vacancy Fit Analyzer — Workflow v0.7
+# AI Vacancy Fit Analyzer — Workflow v0.8
 
 ## Статус
 
@@ -241,7 +241,9 @@ Fallback   Проверка достаточности
 ```text
 Telegram Bot: Watch Updates
   ↓
-Filter: Message.Text Not equal to emptystring
+Filter: Owner text messages only
+  Message.Text Not equal to emptystring
+  AND Message.Chat.ID Equal to owner allowlist literal
   ↓
 Set multiple variables
   vacancy_text ← Telegram Message.Text
@@ -250,9 +252,12 @@ Set multiple variables
 Input Router
   ├─ Missing input → Telegram error
   └─ Command / vacancy Router
-       ├─ vacancy_text Starts with "/" → Telegram welcome
+       ├─ vacancy_text Starts with "/"
+       │  OR vacancy_text Does not match `^[\s\S]{100,}$`
+       │    → Telegram welcome
        └─ both inputs present
           AND vacancy_text Does not start with "/"
+          AND vacancy_text Matches `^[\s\S]{100,}$`
             → AI → fail-closed QA Router
                ├─ Known violation → Telegram FAIL
                └─ fallback → Telegram MANUAL_REVIEW + AI Answer
@@ -274,3 +279,11 @@ Telegram-доставка `Missing input` подтверждена: менее �
 Telegram `FAIL` на текущей Router-архитектуре подтверждён: `17 seconds`, `6 operations`, `6.85 credits`, `5.7 KB`; выполнились AI, FAIL Tools и Telegram block delivery, а `MANUAL_REVIEW` был заблокирован. Временный guaranteed pattern после теста удалён без повторного запуска.
 
 Таким образом, отдельно подтверждены welcome, missing-input, `MANUAL_REVIEW` и `FAIL` Telegram paths. Подробности: [`TELEGRAM_MVP.md`](TELEGRAM_MVP.md).
+
+## Owner allowlist и minimum-length guard
+
+Chat ID владельца хранится только как literal внутри Make filter и не публикуется. Положительный authorized-path test подтверждён, но отрицательный тест с другим Chat ID ещё не выполнялся.
+
+Короткое некомандное сообщение `Привет` было перенаправлено в welcome без AI: менее секунды, `3 operations`, `3 credits`, `1.7 KB`. Длинная учебная вакансия прошла текущий guarded AI path в `MANUAL_REVIEW`: `9 seconds`, `6 operations`, `6.89 credits`, `8.9 KB`.
+
+Техническая маршрутизация длинного теста получила `PASS`. Внешний смысловой QA ответа — `FAIL`: модель превратила обязанность внедрения в неподтверждённое требование прошлого опыта, повторно запросила уже известные город/формат и выдала условный вердикт по несуществующему предложению.

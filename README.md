@@ -176,7 +176,8 @@ Set multiple variables → Router
 - Telegram trigger и доставка `MANUAL_REVIEW` подтверждены реальным end-to-end запуском: `11 seconds`, `6 operations`, `6.94 credits`, `8.7 KB`;
 - Telegram `Missing input` подтверждён отдельно: менее секунды, `4 operations`, `4 credits`, `1.3 KB`, AI не запускался;
 - `/start` welcome подтверждён: менее секунды, `3 operations`, `3 credits`, `1.7 KB`, AI не запускался;
-- Telegram `FAIL` подтверждён на текущей Router-архитектуре: `17 seconds`, `6 operations`, `6.85 credits`, `5.7 KB`; заблокированный AI-ответ пользователю не отправлялся.
+- Telegram `FAIL` подтверждён на текущей Router-архитектуре: `17 seconds`, `6 operations`, `6.85 credits`, `5.7 KB`; заблокированный AI-ответ пользователю не отправлялся;
+- добавлены owner allowlist и minimum-length guard без публикации Chat ID: короткий текст прошёл welcome за менее секунды (`3 operations`, `3 credits`, `1.7 KB`) без AI; вакансия длиннее 100 символов прошла guarded AI route за `9 seconds` (`6 operations`, `6.89 credits`, `8.9 KB`).
 
 Подробная архитектура, модельное сравнение и execution evidence: [`MAKE_MVP.md`](MAKE_MVP.md).
 
@@ -215,6 +216,7 @@ Set multiple variables → Router
 
 - расширить тестирование версии `1.3` на новых типах вакансий;
 - сравнить более сильную модель или независимый semantic QA с текущим `MANUAL_REVIEW`-процессом;
+- отдельно проверить отклонение сообщения с неразрешённого Telegram Chat ID;
 - принять решение об активации Telegram-сценария после оценки стоимости и semantic QA процесса;
 - принимать ссылку через Telegram;
 - автоматически извлекать текст вакансии;

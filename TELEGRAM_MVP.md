@@ -11,8 +11,9 @@ Telegram-версия сценария собрана как отдельная 
 ```text
 Telegram Bot — Watch Updates
   ↓
-Filter: Text messages only
+Filter: Owner text messages only
   Message.Text Not equal to emptystring
+  AND Message.Chat.ID Equal to owner allowlist literal
   ↓
 Tools — Set multiple variables
   vacancy_text = Telegram Message.Text
@@ -24,9 +25,11 @@ Input Router
   │    → Telegram: сообщение об ошибке
   └─ Command / vacancy Router
        ├─ vacancy_text Starts with "/"
+       │  OR vacancy_text Does not match `^[\s\S]{100,}$`
        │    → Telegram: приветствие без AI
        └─ оба input заполнены
           AND vacancy_text Does not start with "/"
+          AND vacancy_text Matches `^[\s\S]{100,}$`
             → validation_status
             → Make AI Toolkit
             → QA Router
@@ -39,6 +42,45 @@ Input Router
 ```
 
 Автоматического `PASS` в Telegram-потоке нет.
+
+## Owner allowlist и защита от короткого текста
+
+Входной filter принимает непустой текст только при совпадении `Message.Chat.ID` с owner allowlist literal. Значение Chat ID хранится только в Make и не включено в screenshots, документацию или GitHub.
+
+Положительный authorized-path test подтверждён: owner message прошёл filter. Отрицательный тест сообщения с другого Chat ID пока не выполнялся, поэтому блокировка постороннего пользователя остаётся configured-but-unverified.
+
+Чтобы короткие сообщения не тратили AI credits, Router использует границу 100 символов:
+
+```text
+AI route:
+vacancy_text Matches ^[\s\S]{100,}$
+
+welcome route:
+vacancy_text Starts with "/"
+OR vacancy_text Does not match ^[\s\S]{100,}$
+```
+
+Реальное некомандное сообщение `Привет` прошло welcome route:
+
+```text
+Duration: less than a second
+Operations: 3
+Credits: 3
+Data size: 1.7 KB
+```
+
+Выполнились trigger, input Tools и Telegram welcome. Missing-input, success Tools и AI были заблокированы.
+
+Реальная учебная вакансия длиннее 100 символов прошла guarded AI route:
+
+```text
+Duration: 9 seconds
+Operations: 6
+Credits: 6.89
+Data size: 8.9 KB
+```
+
+Command/short route и FAIL route были заблокированы; выполнились AI, fallback `MANUAL_REVIEW` и Telegram delivery. Технический path получил `PASS`, но внешний semantic QA ответа — `FAIL` из-за выдуманного требования прямого опыта внедрения, повторных вопросов об уже известных городе/формате и неверного условного вердикта по отсутствующему предложению.
 
 ## Защита от команд и приветствие
 
@@ -225,8 +267,10 @@ AI Answer пользователю не отправлялся. После фи�
 | Path | Duration | Operations | Credits | Data size | AI |
 |---|---:|---:|---:|---:|---|
 | `/start` welcome | < 1 s | 3 | 3 | 1.7 KB | No |
+| Short non-command guard | < 1 s | 3 | 3 | 1.7 KB | No |
 | Missing input | < 1 s | 4 | 4 | 1.3 KB | No |
-| MANUAL_REVIEW | 11 s | 6 | 6.94 | 8.7 KB | Yes |
+| MANUAL_REVIEW baseline | 11 s | 6 | 6.94 | 8.7 KB | Yes |
+| Guarded MANUAL_REVIEW | 9 s | 6 | 6.89 | 8.9 KB | Yes |
 | FAIL | 17 s | 6 | 6.85 | 5.7 KB | Yes, answer blocked |
 
 ## Ограничения
@@ -235,6 +279,7 @@ AI Answer пользователю не отправлялся. После фи�
 - бот принимает текст вакансии, но не читает ссылки, PDF или изображения;
 - команды получают одно общее приветствие; отдельные ответы для `/help` и неизвестных команд пока не реализованы;
 - Telegram-сценарий не активирован для постоянной работы;
+- owner authorized path подтверждён, но deny-path с другим Chat ID пока не проверен;
 - слишком длинный AI-ответ потенциально может превысить лимит одного Telegram-сообщения;
 - детерминированный QA gate ищет известные строки, но не заменяет смысловую проверку;
 - bot token, webhook URL и служебные ID не публикуются.

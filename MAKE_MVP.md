@@ -344,3 +344,29 @@ Data size: 3.8 KB
 Контролируемый Telegram FAIL run на текущей Router-архитектуре выполнил trigger, input Tools, success marker, AI, FAIL Tools и Telegram block delivery: `17 seconds`, `6 operations`, `6.85 credits`, `5.7 KB`. `MANUAL_REVIEW` не выполнялся, а AI Answer не отправлялся пользователю. Временный паттерн `Статус данных` после фиксации доказательств удалён; filter и scenario сохранены без повторного запуска.
 
 Полный поток и ограничения описаны в [`TELEGRAM_MVP.md`](TELEGRAM_MVP.md). Сценарий после теста оставлен `Inactive`.
+
+## Owner allowlist и minimum-length guard
+
+Перед input Tools входной фильтр расширен без публикации literal Chat ID:
+
+```text
+Message.Text Not equal to emptystring
+AND Message.Chat.ID Equal to owner allowlist literal
+```
+
+Current Router filters:
+
+```text
+AI route:
+  both inputs present
+  AND vacancy_text Does not start with "/"
+  AND vacancy_text Matches ^[\s\S]{100,}$
+
+welcome route:
+  vacancy_text Starts with "/"
+  OR vacancy_text Does not match ^[\s\S]{100,}$
+```
+
+Положительный owner-path и short-text guard подтверждены сообщением `Привет`: менее секунды, `3 operations`, `3 credits`, `1.7 KB`; Telegram welcome выполнен, AI отсутствовал. Отклонение чужого Chat ID пока не тестировалось.
+
+Длинная вакансия прошла guarded AI path: `9 seconds`, `6 operations`, `6.89 credits`, `8.9 KB`; выполнилась только delivery `MANUAL_REVIEW`. Технический результат — `PASS`, внешний semantic QA AI Answer — `FAIL`. Сценарий оставлен `Inactive`.

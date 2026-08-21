@@ -344,3 +344,29 @@ Data size: 1.7 KB
 ```
 
 Выполнились Telegram trigger, input Tools и Telegram send. Missing-input и AI routes были заблокированы, AI отсутствовал в execution log. Бот получил полное приветствие с инструкцией прислать текст вакансии и описанием `FAIL` / `MANUAL_REVIEW`.
+
+### Owner allowlist и short-text guard
+
+Owner Chat ID сохранён только внутри Make filter и не опубликован. Реальный owner message `Привет` подтвердил положительный allowlist path и short-text diversion:
+
+```text
+Duration: less than a second
+Operations: 3
+Credits: 3
+Data size: 1.7 KB
+```
+
+Выполнились trigger, input Tools и Telegram welcome; AI отсутствовал. Блокировка сообщения с неразрешённого Chat ID пока не проверялась.
+
+### Guarded long-text MANUAL_REVIEW
+
+Учебная вакансия длиннее 100 символов прошла current AI route:
+
+```text
+Duration: 9 seconds
+Operations: 6
+Credits: 6.89
+Data size: 8.9 KB
+```
+
+Технический route — `PASS`: short-text и FAIL paths заблокированы, AI и `MANUAL_REVIEW` delivery выполнились ровно один раз. Внешний semantic QA — `FAIL`: модель превратила обязанность внедрения в требование прошлого опыта, придумала соответствующий риск и обучение, повторно запросила подтверждённые город/формат, использовала неверный offer verdict и допустила языковую ошибку.

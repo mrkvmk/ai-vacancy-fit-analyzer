@@ -365,3 +365,64 @@ Data size: 5.7 KB
 ```text
 PASS
 ```
+
+## Тест-кейс 18 — Owner allowlist и короткий некомандный текст
+
+### Вход
+
+```text
+Привет
+```
+
+Сообщение отправлено из owner chat. Literal Chat ID хранится только в Make и не документируется.
+
+### Ожидание
+
+- owner filter пропускает bundle;
+- текст короче 100 символов идёт в welcome route;
+- AI не запускается;
+- Telegram отправляет приветствие.
+
+### Фактический результат
+
+```text
+Duration: less than a second
+Operations: 3
+Credits: 3
+Data size: 1.7 KB
+```
+
+Trigger, input Tools и Telegram welcome completed; missing-input и success Tools blocked; AI отсутствовал. Authorized path — `PASS`. Deny-path с другим Chat ID не тестировался.
+
+## Тест-кейс 19 — Guarded vacancy text длиннее 100 символов
+
+### Вход
+
+Учебная вакансия с обязанностями, требованиями, зарплатой, форматом, городом и отсутствием холодных звонков; длина превышает 100 символов.
+
+### Ожидание
+
+- owner filter и regex `^[\s\S]{100,}$` пропускают bundle;
+- command/short route блокируется;
+- AI запускается один раз;
+- выполняется ровно одна production QA delivery.
+
+### Фактический результат
+
+```text
+Duration: 9 seconds
+Operations: 6
+Credits: 6.89
+Data size: 8.9 KB
+```
+
+Выполнились trigger, input Tools, success Tools, AI, MANUAL_REVIEW Tools и Telegram delivery. Missing-input, command/short и FAIL routes были заблокированы.
+
+### Вердикты
+
+```text
+Technical routing: PASS
+External semantic QA: FAIL
+```
+
+Semantic defects: обязанность внедрения превращена в требование прошлого опыта; придуманы риск и обучение; повторно запрошены известные город/формат; offer verdict не отражает отсутствие реального предложения; self-reported QA не считается независимым.
